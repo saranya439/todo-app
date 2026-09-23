@@ -1,12 +1,33 @@
 const express = require("express");
+const path = require("path");
 const Todo = require("./models/todo");
 
 const app = express();
 
-app.use(express.json());
+app.set("view engine", "ejs");
+app.set("views", path.join(__dirname, "views"));
 
-app.get("/", (request, response) => {
-  response.send("Todo Express Server is running!");
+app.use(express.json());
+app.use(express.static(path.join(__dirname, "public")));
+
+app.get("/", async (request, response) => {
+  try {
+    const today = new Date().toISOString().split("T")[0];
+
+    const [overdue, dueToday, dueLater] = await Promise.all([
+      Todo.overdue(today),
+      Todo.dueToday(today),
+      Todo.dueLater(today),
+    ]);
+
+    response.render("index", {
+      overdue,
+      dueToday,
+      dueLater,
+    });
+  } catch (error) {
+    response.status(500).send(error.message);
+  }
 });
 
 // GET /todos - Get all todos
@@ -34,5 +55,7 @@ app.delete("/todos/:id", async (request, response) => {
   }
 });
 
-
 module.exports = app;
+app.listen(3000, () => {
+  console.log("Server running at http://localhost:3000");
+});
