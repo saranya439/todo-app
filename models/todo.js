@@ -1,4 +1,4 @@
-const { DataTypes } = require("sequelize");
+const { DataTypes, Op } = require("sequelize");
 const { sequelize } = require("./index");
 
 const Todo = sequelize.define(
@@ -41,7 +41,7 @@ Todo.overdue = async function (today) {
     where: {
       completed: false,
       dueDate: {
-        [require("sequelize").Op.lt]: today,
+        [Op.lt]: today,
       },
     },
     order: [["dueDate", "ASC"]],
@@ -63,7 +63,7 @@ Todo.dueLater = async function (today) {
     where: {
       completed: false,
       dueDate: {
-        [require("sequelize").Op.gt]: today,
+        [Op.gt]: today,
       },
     },
     order: [["dueDate", "ASC"]],
